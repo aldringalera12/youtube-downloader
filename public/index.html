@@ -204,7 +204,7 @@
 
     document.getElementById('loading-container').style.display = 'block';
 
-    const renderURL = 'https://youtube-downloader-bvbr.onrender.com';
+    const renderURL = 'https://youtube-downloader-bvbr.onrender.com'; // No trailing slash
     let downloadUrl = `${renderURL}/download?url=${encodeURIComponent(url)}&format=${encodeURIComponent(format)}`;
 
     if (format === 'mp4') {

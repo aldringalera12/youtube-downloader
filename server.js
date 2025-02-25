@@ -38,8 +38,7 @@ app.get('/download', async (req, res) => {
             return res.status(500).json({ error: 'Failed to fetch video title' });
         }
 
-        videoTitle = videoTitle.trim().replace(/[<>:"/\\|?*]+/g, '');
-        if (!videoTitle) videoTitle = 'YouTube_Video'; // Fallback title
+        videoTitle = videoTitle.trim().replace(/[<>:"/\\|?*]+/g, ''); // Sanitize filename
 
         let format;
         let extension;
