@@ -188,51 +188,38 @@
         }
 
         function downloadFile() {
-            const url = document.getElementById('url').value;
-            const format = document.getElementById('format').value;
-            const quality = document.getElementById('quality').value;
+    const url = document.getElementById('url').value;
+    const format = document.getElementById('format').value;
+    const quality = document.getElementById('quality').value;
 
-            if (!url) {
-                alert('Please enter a YouTube URL');
-                return;
-            }
-            
-            // Validate YouTube URL
-            if (!url.match(/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/)) {
-                alert('Please enter a valid YouTube URL');
-                return;
-            }
+    if (!url) {
+        alert('Please enter a YouTube URL');
+        return;
+    }
 
-            // Show loading message
-            document.getElementById('loading-container').style.display = 'block';
+    if (!url.match(/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/)) {
+        alert('Please enter a valid YouTube URL');
+        return;
+    }
 
-            let downloadUrl = `http://localhost:3000/download?url=${encodeURIComponent(url)}&format=${encodeURIComponent(format)}`;
+    document.getElementById('loading-container').style.display = 'block';
 
-            // Only add quality if downloading video
-            if (format === 'mp4') {
-                downloadUrl += `&quality=${encodeURIComponent(quality)}`;
-            }
+    // 🔴 Replace 'http://localhost:3000' with your Render domain
+    const renderURL = 'https://youtube-downloader-z7rj.onrender.com/'; // Update this
 
-            // Update alert message based on format
-            const alertTitle = document.querySelector('.alert-title');
-            const alertMessage = document.querySelector('.alert-message');
-            
-            if (format === 'mp3') {
-                alertTitle.textContent = 'Downloading Audio';
-                alertMessage.textContent = 'Your MP3 file is being prepared. This may take a few moments...';
-            } else {
-                alertTitle.textContent = 'Downloading Video';
-                alertMessage.textContent = `Your ${quality} MP4 is being prepared. This may take a few moments...`;
-            }
+    let downloadUrl = `${renderURL}/download?url=${encodeURIComponent(url)}&format=${encodeURIComponent(format)}`;
 
-            // Redirect to download URL
-            window.location.href = downloadUrl;
+    if (format === 'mp4') {
+        downloadUrl += `&quality=${encodeURIComponent(quality)}`;
+    }
 
-            // Hide loading message after timeout (keep it longer for better UX)
-            setTimeout(() => {
-                document.getElementById('loading-container').style.display = 'none';
-            }, 8000);
-        }
+    window.location.href = downloadUrl;
+
+    setTimeout(() => {
+        document.getElementById('loading-container').style.display = 'none';
+    }, 8000);
+}
+
         
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', toggleQuality);
