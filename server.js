@@ -8,7 +8,7 @@ app.use(cors());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/download', (req, res) => {
+app.get('/download', async (req, res) => {
     const videoUrl = req.query.url;
     const formatType = req.query.format || 'mp4';
     const quality = req.query.quality || 'best';
