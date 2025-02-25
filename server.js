@@ -18,8 +18,11 @@ app.get('/download', async (req, res) => {
     }
 
     const ytDlpPath = 'yt-dlp'; // ✅ Use system-installed yt-dlp
-    const cookiesPath = path.join(__dirname, 'cookies'); // ✅ Update cookies file path
-
+    const cookiesPath = path.join(__dirname, 'cookies.txt');
+    console.log(`Using cookies file at: ${cookiesPath}`);
+    
+    const ytProcess = spawn(ytDlpPath, ['--cookies', cookiesPath, '-f', format, '-o', '-', videoUrl]);
+    
     // Step 1: Get the Video Title
     const titleProcess = spawn(ytDlpPath, ['--get-title', videoUrl]);
 
