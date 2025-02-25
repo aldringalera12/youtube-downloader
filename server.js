@@ -64,7 +64,7 @@ app.get('/download', async (req, res) => {
         res.setHeader('Content-Type', contentType);
 
         // Step 3: Download the Video/Audio
-        const ytProcess = spawn(ytDlpPath, ['-f', format, '-o', '-', videoUrl]);
+        const ytProcess = spawn(ytDlpPath, ['-f', format, '--cookies', 'cookies.txt', '-o', '-', videoUrl]);
 
         ytProcess.stdout.pipe(res);
 
