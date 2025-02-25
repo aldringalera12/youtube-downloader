@@ -18,6 +18,7 @@ app.get('/download', async (req, res) => {
     }
 
     const ytDlpPath = 'yt-dlp'; // ✅ Use system-installed yt-dlp
+    const cookiesPath = path.join(__dirname, 'cookies'); // ✅ Update cookies file path
 
     // Step 1: Get the Video Title
     const titleProcess = spawn(ytDlpPath, ['--get-title', videoUrl]);
@@ -64,7 +65,7 @@ app.get('/download', async (req, res) => {
         res.setHeader('Content-Type', contentType);
 
         // Step 3: Download the Video/Audio
-        const ytProcess = spawn(ytDlpPath, ['--cookies', '/app/cookies.txt', '-f', format, '-o', '-', videoUrl]);
+        const ytProcess = spawn(ytDlpPath, ['--cookies', cookiesPath, '-f', format, '-o', '-', videoUrl]);
 
         ytProcess.stdout.pipe(res);
 
@@ -100,4 +101,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-
