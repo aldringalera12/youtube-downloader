@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Downloader</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+        }
+        
+        h2 {
+            color: #e62117;
+            margin-top: 0;
+            font-size: 28px;
+        }
+        
+        input, select {
+            padding: 12px;
+            width: 100%;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        input:focus, select:focus {
+            border-color: #e62117;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(230, 33, 23, 0.2);
+        }
+        
+        button {
+            padding: 14px 24px;
+            background-color: #e62117;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: background-color 0.3s, transform 0.1s;
+            width: 100%;
+        }
+        
+        button:hover {
+            background-color: #c31c0d;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        #loading-container {
+            display: none;
+            margin-top: 20px;
+            width: 100%;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            border-left: 5px solid #e62117;
+            display: flex;
+            align-items: center;
+            text-align: left;
+            animation: pulse 2s infinite;
+        }
+        
+        .alert-icon {
+            margin-right: 15px;
+            color: #e62117;
+            font-size: 24px;
+        }
+        
+        .alert-text {
+            flex-grow: 1;
+        }
+        
+        .alert-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #e62117;
+        }
+        
+        .alert-message {
+            margin: 0;
+            color: #555;
+        }
+        
+        .spinner {
+            border: 3px solid rgba(230, 33, 23, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid #e62117;
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(230, 33, 23, 0.4); }
+            70% { box-shadow: 0 0 0 5px rgba(230, 33, 23, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(230, 33, 23, 0); }
+        }
+        
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>YouTube Downloader</h2>
+        
+        <input type="text" id="url" placeholder="Paste YouTube URL here...">
+        
+        <select id="format" onchange="toggleQuality()">
+            <option value="mp4">MP4 (Video)</option>
+            <option value="mp3">MP3 (Audio Only)</option>
+        </select>
+
+        <select id="quality">
+            <option value="1080p">1080p (HD)</option>
+            <option value="720p">720p (HD)</option>
+            <option value="480p">480p (SD)</option>
+            <option value="best">Best Available</option>
+        </select>
+
+        <button onclick="downloadFile()">DOWNLOAD</button>
+        
+        <div id="loading-container">
+            <div class="alert">
+                <div class="alert-icon">⏬</div>
+                <div class="alert-text">
+                    <div class="alert-title">Download Started</div>
+                    <p class="alert-message">Your file is being prepared. Please wait a moment...</p>
+                </div>
+                <div class="spinner"></div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            For personal use only. Respect copyright laws.
+        </div>
+    </div>
+
+    <script>
+        function toggleQuality() {
+            const format = document.getElementById('format').value;
+            const qualityDropdown = document.getElementById('quality');
+            
+            if (format === 'mp3') {
+                qualityDropdown.style.display = 'none';
+            } else {
+                qualityDropdown.style.display = 'block';
+            }
+        }
+
+        function downloadFile() {
+            const url = document.getElementById('url').value;
+            const format = document.getElementById('format').value;
+            const quality = document.getElementById('quality').value;
+
+            if (!url) {
+                alert('Please enter a YouTube URL');
+                return;
+            }
+            
+            // Validate YouTube URL
+            if (!url.match(/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/)) {
+                alert('Please enter a valid YouTube URL');
+                return;
+            }
+
+            // Show loading message
+            document.getElementById('loading-container').style.display = 'block';
+
+            let downloadUrl = `http://localhost:3000/download?url=${encodeURIComponent(url)}&format=${encodeURIComponent(format)}`;
+
+            // Only add quality if downloading video
+            if (format === 'mp4') {
+                downloadUrl += `&quality=${encodeURIComponent(quality)}`;
+            }
+
+            // Update alert message based on format
+            const alertTitle = document.querySelector('.alert-title');
+            const alertMessage = document.querySelector('.alert-message');
+            
+            if (format === 'mp3') {
+                alertTitle.textContent = 'Downloading Audio';
+                alertMessage.textContent = 'Your MP3 file is being prepared. This may take a few moments...';
+            } else {
+                alertTitle.textContent = 'Downloading Video';
+                alertMessage.textContent = `Your ${quality} MP4 is being prepared. This may take a few moments...`;
+            }
+
+            // Redirect to download URL
+            window.location.href = downloadUrl;
+
+            // Hide loading message after timeout (keep it longer for better UX)
+            setTimeout(() => {
+                document.getElementById('loading-container').style.display = 'none';
+            }, 8000);
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', toggleQuality);
+    </script>
+</body>
+</html>
