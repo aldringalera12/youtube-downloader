@@ -4,7 +4,7 @@ const { spawn } = require('child_process');
 const path = require('path');
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: '*' })); // Allow all origins
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -38,7 +38,8 @@ app.get('/download', async (req, res) => {
             return res.status(500).json({ error: 'Failed to fetch video title' });
         }
 
-        videoTitle = videoTitle.trim().replace(/[<>:"/\\|?*]+/g, ''); // Sanitize filename
+        videoTitle = videoTitle.trim().replace(/[<>:"/\\|?*]+/g, '');
+        if (!videoTitle) videoTitle = 'YouTube_Video'; // Fallback title
 
         let format;
         let extension;

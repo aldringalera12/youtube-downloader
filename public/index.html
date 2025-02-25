@@ -190,7 +190,7 @@
         function downloadFile() {
     const url = document.getElementById('url').value;
     const format = document.getElementById('format').value;
-    const quality = document.getElementById('quality').value;
+    const quality = document.getElementById('quality') ? document.getElementById('quality').value : 'best';
 
     if (!url) {
         alert('Please enter a YouTube URL');
@@ -204,21 +204,38 @@
 
     document.getElementById('loading-container').style.display = 'block';
 
-    // 🔴 Replace 'http://localhost:3000' with your Render domain
-    const renderURL = 'https://youtube-downloader-bvbr.onrender.com/'; // Update this
-
+    const renderURL = 'https://youtube-downloader-bvbr.onrender.com';
     let downloadUrl = `${renderURL}/download?url=${encodeURIComponent(url)}&format=${encodeURIComponent(format)}`;
 
     if (format === 'mp4') {
         downloadUrl += `&quality=${encodeURIComponent(quality)}`;
     }
 
-    window.location.href = downloadUrl;
+    fetch(downloadUrl)
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to download');
+            return response.blob();
+        })
+        .then(blob => {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
 
-    setTimeout(() => {
-        document.getElementById('loading-container').style.display = 'none';
-    }, 8000);
+            // Set appropriate file extension based on format
+            link.download = format === 'mp3' ? 'audio.mp3' : 'video.mp4';
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Hide the loading indicator
+            document.getElementById('loading-container').style.display = 'none';
+        })
+        .catch(error => {
+            alert('Error: ' + error.message);
+            document.getElementById('loading-container').style.display = 'none';
+        });
 }
+
 
         
         // Initialize on page load
