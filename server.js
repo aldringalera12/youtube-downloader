@@ -4,8 +4,7 @@ const { spawn } = require('child_process');
 const path = require('path');
 
 const app = express();
-app.use(cors({ origin: '*' })); // Allow all origins
-
+app.use(cors({ origin: '*' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/download', async (req, res) => {
@@ -17,13 +16,30 @@ app.get('/download', async (req, res) => {
         return res.status(400).json({ error: 'Invalid YouTube URL' });
     }
 
-    const ytDlpPath = 'yt-dlp'; // ✅ Use system-installed yt-dlp
+    const ytDlpPath = 'yt-dlp';
     const cookiesPath = path.join(__dirname, 'cookies.txt');
+
     console.log(`Using cookies file at: ${cookiesPath}`);
-    
-    const ytProcess = spawn(ytDlpPath, ['--cookies', cookiesPath, '-f', format, '-o', '-', videoUrl]);
-    
-    // Step 1: Get the Video Title
+
+    let format;
+    let extension;
+    let contentType;
+
+    if (formatType === 'mp3') {
+        format = 'bestaudio';
+        extension = '.mp3';
+        contentType = 'audio/mpeg';
+    } else {
+        switch (quality) {
+            case '1080p': format = 'bestvideo[height<=1080]+bestaudio/best'; break;
+            case '720p': format = 'bestvideo[height<=720]+bestaudio/best'; break;
+            case '480p': format = 'bestvideo[height<=480]+bestaudio/best'; break;
+            default: format = 'best';
+        }
+        extension = '.mp4';
+        contentType = 'video/mp4';
+    }
+
     const titleProcess = spawn(ytDlpPath, ['--get-title', videoUrl]);
 
     let videoTitle = '';
@@ -43,31 +59,12 @@ app.get('/download', async (req, res) => {
         }
 
         videoTitle = videoTitle.trim().replace(/[<>:"/\\|?*]+/g, ''); // Sanitize filename
-
-        let format;
-        let extension;
-        let contentType;
-
-        if (formatType === 'mp3') {
-            format = 'bestaudio';
-            extension = '.mp3';
-            contentType = 'audio/mpeg';
-        } else {
-            switch (quality) {
-                case '1080p': format = 'bestvideo[height<=1080]+bestaudio/best'; break;
-                case '720p': format = 'bestvideo[height<=720]+bestaudio/best'; break;
-                case '480p': format = 'bestvideo[height<=480]+bestaudio/best'; break;
-                default: format = 'best';
-            }
-            extension = '.mp4';
-            contentType = 'video/mp4';
-        }
-
         const filename = `${videoTitle}${extension}`;
+
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         res.setHeader('Content-Type', contentType);
 
-        // Step 3: Download the Video/Audio
+        // Start downloading
         const ytProcess = spawn(ytDlpPath, ['--cookies', cookiesPath, '-f', format, '-o', '-', videoUrl]);
 
         ytProcess.stdout.pipe(res);
